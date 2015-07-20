@@ -1,4 +1,4 @@
-# powershell
+# Powershell Baseline Script
 This is a work in progress. The goal is to create a script that will take a snapshot of interesting data (processes, services, etc) of a machine and have the ability to do a comparison of the snapshot in the future. 
 
 ```powershell
