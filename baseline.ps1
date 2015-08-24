@@ -31,7 +31,7 @@ elseif($compare_all) {
 
 }
 elseif($run) {
-Get-Item HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run | Tee-Object -FilePath C:\Tools\run.txt
+Get-Item HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run | Tee-Object -FilePath c:\tools\run.txt
 Get-Item HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce | Tee-Object -FilePath C:\Tools\runonce.txt
 }
 else{
