@@ -15,15 +15,6 @@ elseif($compare_local) {
     Compare-Object -ReferenceObject(Import-Clixml C:\tools\process.xml) -DifferenceObject(Get-Process) -Property name | Tee-Object -FilePath C:\tools\processlog.txt;
     Write-Host `r`n "    Output is stored at c:\tools\servicelog.txt and c:\tools\processlog.txt" -ForegroundColor Green;
     }
-elseif($h) {
-    Write-Host " Options:" -ForegroundColor Green
-    Write-Host " -baseline_local:" `t "Conducts Service and Process List Baseline" -ForegroundColor Green
-    Write-Host " -compare_local:" `t "Conducts a baseline comparison" -ForegroundColor Green
-    Write-Host " -adcomputer:" `t`t "Creates an .xml file of all computers in AD (Requires ActiveDirectory Modules!)" -ForegroundColor Green
-    Write-Host " -baseline_all:" `t "Conducts Service and Proces List Baseline for all AD Computers (or whatever is in C:\Tools\computers.xml" -ForegroundColor Green    
-    Write-Host " -compare_all:" `t`t "Conducts a baseline for all AD Computers" -ForegroundColor Green
-    Write-Host " -run:" `t`t`t`t "Stores the run and runonce keys into a text file" -ForegroundColor Green
-    } 
 elseif($adcomputer) {
     Get-ADComputer -filter * | Select-Object -property name | ft -HideTableHeaders | Export-Clixml c:\tools\computers.xml;
     Write-Host "    Output is located at c:\tools\computers.xml" -ForegroundColor Green;
@@ -38,6 +29,15 @@ elseif($run) {
 Get-Item HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run | Tee-Object -FilePath C:\Tools\run.txt
 Get-Item HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce | Tee-Object -FilePath C:\Tools\runonce.txt
 }
+elseif($h) {
+    Write-Host " Options:" -ForegroundColor Green
+    Write-Host " -baseline_local:" `t "Conducts Service and Process List Baseline" -ForegroundColor Green
+    Write-Host " -compare_local:" `t "Conducts a baseline comparison" -ForegroundColor Green
+    Write-Host " -adcomputer:" `t`t "Creates an .xml file of all computers in AD (Requires ActiveDirectory Modules!)" -ForegroundColor Green
+    Write-Host " -baseline_all:" `t "Conducts Service and Proces List Baseline for all AD Computers (or whatever is in C:\Tools\computers.xml" -ForegroundColor Green    
+    Write-Host " -compare_all:" `t`t "Conducts a baseline for all AD Computers" -ForegroundColor Green
+    Write-Host " -run:" `t`t`t`t "Stores the run and runonce keys into a text file" -ForegroundColor Green
+} 
 else{
     Write-Host "use -h for switch options" -ForegroundColor Yellow
     }
