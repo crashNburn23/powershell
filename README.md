@@ -6,6 +6,7 @@ This is a work in progress. The goal is to create a script that will take a snap
 - Contains two switches (baseline and persistence)
 - The persistence options conducts some searches that would help identify persistence
 - It was built using powershell v2 (will update it once I quit working in a V2 environment)
+- Recently added a hash switch that will take a hash of c:\windows and c:\windows\system32 -recursively (cant run with powershell v2)
 
 **The dllfun script does the following:** 
 - Creates a hashtable of .dlls and hashes, sorts them, and reports any .dlls with the same name and a different hash
