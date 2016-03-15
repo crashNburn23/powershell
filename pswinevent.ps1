@@ -38,7 +38,7 @@ Write-Host "Parsing Complete" -ForegroundColor Yellow
 }
 
 #Define what happens with the -txt
-elif($txt)
+elseif($txt)
 {
 
 #create a folder on the desktop
