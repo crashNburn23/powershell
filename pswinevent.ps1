@@ -22,16 +22,12 @@ mkdir $env:USERPROFILE\desktop\eventlogs | out-null
 #create a for loop that will go through each of the identified security ids
 
 Write-Host "Parsing out select windows event logs" -ForegroundColor Yellow
-
+$i = 0
 foreach($event in $events)
 {
+$i = $i + 1
 
-#here is the command that will get executed and stored into the folder on the desktop
-for($i =1; $i -le $events.count; $i++)
-{
-
-Write-Progress -Activity "Parsing Data" -Status "Going through event id $event" -PercentComplete ($i/$count) 
-}
+Write-Progress -Activity "Parsing Data" -Status "Going through event id $event" -PercentComplete ($i/$count*100) 
 
 Get-WinEvent -Path $filepath | Where-Object {$_.id -eq $event} | Export-Csv -Path $env:USERPROFILE\Desktop\eventlogs\events_$event.csv -Append
 
@@ -51,15 +47,13 @@ mkdir $env:USERPROFILE\desktop\eventlogs | out-null
 
 #create a for loop that will go through each of the identified security ids
 Write-Host "Parsing out select windows event logs" -ForegroundColor Yellow
-
+$i = 0 
 foreach($event in $events)
 {
+$i = $i + 1
 
-#here is the command that will get executed and stored into the folder on the desktop
-for($i =1; $i -le $events.count; $i++)
-{
 Write-Progress -Activity "Parsing Data" -Status "Going through event id $event" -PercentComplete ($i/$count) 
-}
+
 Get-WinEvent -Path $filepath | Where-Object {$_.id -eq $event} | Select timecreated,providername,id,level,logname,processid,message | Format-List | Out-File $env:USERPROFILE\Desktop\eventlogs\events_$event.txt
 
 }
