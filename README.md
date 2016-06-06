@@ -28,3 +28,8 @@ Below is a list of powershell scripts that I have started and work on as I learn
 - There is also a fileversion switch that creates a hashtable with .dlls with the same name and different fileversions
 - Both of these produces a lot of results and I am not sure where else to take this (I guess updates and a running system changes the state and file version of .dlls)
 
+**The psgmail script does the following:**
+- The -pull switch prompts the user for their gmail credentials and downloads emails that contain a certain string in the body
+- The -filter switch parses through the emails and removes email addresses
+- This will probably not be usefull for anyone, but it showcases the gmail.ps capabilities
+
