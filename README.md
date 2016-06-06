@@ -1,7 +1,7 @@
-# Powershell Baseline Script
-This is a work in progress. The goal is to create a script that will take a snapshot of interesting data (processes, services, etc) of a machine and have the ability to do a comparison of the snapshot in the future. 
+# Powershell Scripts
+Below is a list of powershell scripts that I have started and work on as I learn more about powershell. My goal is to find ways to improve and automate some of the tasks that I do often. 
 
-**It does the following:** 
+**baseline does the following:** 
 - Creates a folder with all of the data in seperate text documents
 - Contains two switches (baseline and persistence)
 - The persistence options conducts some searches that would help identify persistence
