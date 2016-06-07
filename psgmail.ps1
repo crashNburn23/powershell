@@ -3,7 +3,7 @@ param([switch]$pull, [switch]$filter)
 if($pull)
 {
 #Create a variable for the desktop location and create a text document to save information
-$location = $env:USERPROFILE\desktop
+$location = $env:USERPROFILE
 New-Object $location\emails.txt
 
 Write-Host "Provide your gmail credentials" -ForegroundColor Green
@@ -20,7 +20,7 @@ Write-Host "Download Complete. Emails stored on your desktop. Use the -filter op
 elseif($filter)
 {
 Select-String "RSVP submitted by" $location\emails.txt | ForEach-Object{$_.Line} | Out-File -FilePath $location\filtered.txt
-Get-Content $location\filtered.txt | %{$_ -split " "} | Out-File -FilePath $location\contactlist.txt
+Get-Content $location\filtered.txt | %{$_ -split " "} | Select-String "@" | Out-File -FilePath $location\desktop\contactlist.txt
 Remove-Item $location\emails.txt, $location\filtered.txt
 }
 
