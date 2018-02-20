@@ -30,7 +30,8 @@ Get-WmiObject win32_process -ErrorAction SilentlyContinue | where {$_.name -eq '
 
 #collect information on the volume shadow copy
 Write-Host "Collecting information on the VSC" -ForegroundColor Green -BackgroundColor Black
-Get-WmiObject Win32_ShadowCopy -ErrorAction SilentlyContinue | select DeviceObject,@{NAME='CreationDate';EXPRESSION={$_.ConvertToDateTime($_.InstallDate)}} | Out-File $path\network_info\volumeshadow.txt
+Get-WmiObject Win32_ShadowCopy -ErrorAction SilentlyContinue | select DeviceObject,@{NAME='CreationDate';EXPRESSION={$_.ConvertToDateTime($_.InstallDate)}} | Out-File $path\host_system_info\volumeshadow.txt
+vssadmin.exe list shadows > $path\host_system_info\vsc_vssadmin.txt
 
 #Collect a descending list of the prefetch
 Write-Host "Collecting information on the prefetch" -ForegroundColor Green -BackgroundColor Black
@@ -47,6 +48,7 @@ Get-HotFix | Out-File $path\host_system_info\hotfix.txt
 Get-WmiObject win32_networkadapter | select netconnectionid, name, interfaceindex, netconnectionstatus | Format-Table | Out-File $path\network_info\netadapters.txt
 ipconfig /all | Out-File $path\network_info\ipconfig.txt
 ipconfig /displaydns | Out-File $path\network_info\dns.txt
+Get-NetTCPConnection | where-object state -eq Established | where-object remoteaddress -notlike 127.0.0.1 | Select OwningProcess, LocalAddress, LocalPort, RemoteAddress, RemotePort | Format-Table | Out-File $path\network_info\nettcpinfo.txt
 
 #collect information on the current time and timezone
 Write-Host "Collecting locattime information" -ForegroundColor Green -BackgroundColor Black
@@ -97,12 +99,12 @@ Get-ItemProperty 'HKLM:\Software\Microsoft\Active Setup\Installed Components\*' 
 Get-ItemProperty 'hklm:\Software\Microsoft\Windows\CurrentVersion\App Paths\*' -ErrorAction SilentlyContinue | select ComponentID,'(default)',StubPath | Out-File $path\reg\app_path.txt
 Get-ItemProperty 'hklm:\software\microsoft\windows nt\CurrentVersion\winlogon\*\*' | select '(default)',DllName | Out-File $path\reg\winlogon_dlls.txt
 Get-ItemProperty 'hkcu:\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths' | Out-File $path\reg\win_explorer_typedurls.txt
-Get-ItemProperty hklm:\SOFTWARE\Classes\HTTP\shell\open\command | select '(default)' | Out-File $path\reg\iexplore_shell.txt
+Get-ItemProperty 'hklm:\SOFTWARE\Classes\HTTP\shell\open\command' | select '(default)' | Out-File $path\reg\iexplore_shell.txt
 Get-ItemProperty 'hklm:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects\*' | select '(default)' | Out-File $path\reg\iexplore_browser_helper.txt
 Get-ItemProperty 'HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects\*' | select '(default)' | Out-File $path\reg\iexplore_wow_browser_helper.txt
 Get-ItemProperty 'hklm:\Software\Microsoft\Internet Explorer\Extensions\*' | select ButtonText, Icon | Out-File $path\reg\iexplore_extensions.txt
 Get-ItemProperty 'hklm:\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions\*' | select ButtonText, Icon | Out-File $path\reg\iexplore_wow_extensions.txt
-Get-ItemProperty  hklm:\system\currentcontrolset\enum\usbstor\*\* -ErrorAction SilentlyContinue| select FriendlyName,PSChildName,ContainerID | Out-File $paht\reg\usb_enum.txt
+Get-ItemProperty 'hklm:\system\currentcontrolset\enum\usbstor\*\*' -ErrorAction SilentlyContinue | select FriendlyName,PSChildName,ContainerID | Out-File $path\reg\usb_enum.txt
 
 #collect information on windows event logs
 Get-WinEvent -max 50 -ea 0 -FilterHashtable @{Logname='application';ID=1002} | select TimeCreated,ID,Message | Out-File $path\eventlog\application_install.txt
@@ -114,37 +116,7 @@ Get-WinEvent -max 50 -ea 0 -FilterHashtable @{Logname='security';ID=4672} | sele
 Get-WinEvent -max 50 -ea 0 -FilterHashtable @{Logname='system';ID=64001} | select TimeCreated,ID,Message | Out-File $path\eventlog\file_replacement.txt
 
 Write-Host "Conduncting scan of scheduled tasks" -ForegroundColor Green -BackgroundColor Black
-function getTasks($path) 
-{
-    $out = @()
-    # Get root tasks
-    $schedule.GetFolder($path).GetTasks(0) | % {
-        $xml = [xml]$_.xml
-        $out += New-Object psobject -Property @{
-            "Name" = $_.Name
-            "Path" = $_.Path
-            "LastRunTime" = $_.LastRunTime
-            "NextRunTime" = $_.NextRunTime
-            "Actions" = ($xml.Task.Actions.Exec | % { "$($_.Command) $($_.Arguments)" }) -join "`n"
-        }
-    }
-    # Get tasks from subfolders
-    $schedule.GetFolder($path).GetFolders(0) | % {
-        $out += getTasks($_.Path)
-    }
-    #Output
-    $out
-}
-$tasks = @()
-$schedule = New-Object -ComObject "Schedule.Service"
-$schedule.Connect() 
-# Start inventory
-$tasks += getTasks("\")
-# Close com
-[System.Runtime.Interopservices.Marshal]::ReleaseComObject($schedule) | Out-Null
-Remove-Variable schedule
-# Output all tasks
-$tasks | Out-File $path\host_system_info\scheduled_tasks.txt
+Get-ScheduledTask | select TaskName, TaskPath, Description, URI, State -ErrorAction SilentlyContinue | Out-File $path\host_system_info\scheduledtasks.txt
 
 #list items in scheduled tasks folder
 Get-ChildItem C:\Windows\System32\tasks -filter * | Out-File $path\host_system_info\scheduledtasks_folder.txt
@@ -213,7 +185,7 @@ Get-WmiObject -Namespace root\Subscription -Class __FiltertoConsumerBinding | Ou
 elseif($hash)
 {
 Write-Host "Hashing C:\windows" -ForegroundColor Green -BackgroundColor Black
-Get-ChildItem C:\Windows | Get-FileHash -Algorithm MD5 | Out-File $home\desktop\windows_hash.txt
+Get-ChildItem C:\Windows | Get-FileHash -Algorithm SHA1 -ErrorAction SilentlyContinue | Out-File $home\desktop\windows_hash.txt
 
 Write-Host "Hashing C:\Windows\System32 -recurse" -ForegroundColor Green -BackgroundColor Black
 Get-ChildItem C:\Windows\System32 -Recurse -ErrorAction SilentlyContinue | Get-FileHash -Algorithm MD5 | Out-File $home\desktop\system32_hash.txt
